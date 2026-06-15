@@ -62,4 +62,3 @@ async def get_metrics():
         "cache_hit_rate": "99.2%",
         "uptime_seconds": 86400
     }
-

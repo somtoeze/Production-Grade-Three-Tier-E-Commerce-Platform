@@ -36,4 +36,3 @@ class Category(Base):
     slug = Column(String(100), unique=True)
     description = Column(Text)
     parent_id = Column(Integer, nullable=True)
-
