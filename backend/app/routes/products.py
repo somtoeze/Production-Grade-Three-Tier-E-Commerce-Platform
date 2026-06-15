@@ -22,7 +22,7 @@ async def get_products(
 ):
     """Get paginated list of products with filtering"""
 
-    query = db.query(Product).filter(Product.is_active == True)
+    query = db.query(Product).filter(Product.is_active is True)  # ← FIXED
 
     # Apply filters
     if category:
@@ -42,8 +42,8 @@ async def get_products(
     if max_price:
         query = query.filter(Product.price <= max_price)
 
-    if featured:
-        query = query.filter(Product.is_featured == True)
+    if featured is True:  # ← FIXED (was: if featured:)
+        query = query.filter(Product.is_featured is True)  # ← FIXED
 
     # Get total count
     total = query.count()
@@ -68,3 +68,5 @@ async def get_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
 
     return product
+
+
