@@ -1,8 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import redis
-from app.database import engine, SessionLocal
 from app.routes import products, auth, cart, orders
 from app.config import settings
 
@@ -26,7 +25,7 @@ app.add_middleware(
 
 # Security headers
 app.add_middleware(
-    TrustedHostMiddleware, 
+    TrustedHostMiddleware,
     allowed_hosts=settings.ALLOWED_HOSTS
 )
 
@@ -43,14 +42,17 @@ redis_client = redis.Redis(
     decode_responses=True
 )
 
+
 @app.get("/")
 async def root():
     return {"message": "E-Commerce API is running", "status": "healthy"}
+
 
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint for load balancers"""
     return {"status": "healthy", "service": "backend-api"}
+
 
 @app.get("/api/metrics")
 async def get_metrics():
