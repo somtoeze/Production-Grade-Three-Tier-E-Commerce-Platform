@@ -63,4 +63,3 @@ async def get_metrics():
         "uptime_seconds": 86400
     }
 
-

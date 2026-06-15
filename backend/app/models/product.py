@@ -37,4 +37,3 @@ class Category(Base):
     description = Column(Text)
     parent_id = Column(Integer, nullable=True)
 
-
