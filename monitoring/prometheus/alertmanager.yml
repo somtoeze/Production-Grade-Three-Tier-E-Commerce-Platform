@@ -1,0 +1,138 @@
+# monitoring/alertmanager.yml
+
+global:
+  resolve_timeout: 5m
+
+# Where to route different alerts based on labels
+route:
+  group_by: ['alertname', 'severity', 'team']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  
+  # Default receiver for all alerts
+  receiver: 'default-receiver'
+  
+  # Route based on severity label
+  routes:
+    # Critical alerts - page the on-call engineer
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      continue: true
+      group_wait: 5s
+      repeat_interval: 30m
+    
+    # Warning alerts - send to team channel
+    - match:
+        severity: warning
+      receiver: 'warning-receiver'
+      continue: true
+    
+    # Info alerts - log only, no notification
+    - match:
+        severity: info
+      receiver: 'info-receiver'
+      
+    # Team-based routing (optional)
+    - match:
+        team: database
+      receiver: 'database-team'
+    
+    - match:
+        team: performance
+      receiver: 'performance-team'
+
+# Receivers - where the alerts actually go
+receivers:
+  # Default receiver (console log for debugging)
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+  
+  # Critical alerts - send email to oncall
+  - name: 'critical-receiver'
+    email_configs:
+      - to: 'oncall@yourcompany.com'
+        from: 'alertmanager@yourcompany.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'your-email@gmail.com'
+        auth_password: 'your-app-password'
+        send_resolved: true
+        headers:
+          subject: '🚨 [CRITICAL] {{ .GroupLabels.alertname }} on {{ .ExternalURL }}'
+        html: |-
+          <h1>Critical Alert</h1>
+          <p><strong>Alert:</strong> {{ .GroupLabels.alertname }}</p>
+          <p><strong>Severity:</strong> {{ .CommonLabels.severity }}</p>
+          <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+          <p><strong>Time:</strong> {{ .StartsAt }}</p>
+          <p><strong>Graph:</strong> <a href="{{ .GeneratorURL }}">View in Prometheus</a></p>
+    
+    # Also send to Slack
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#oncall-alerts'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |-
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .CommonLabels.severity }}
+          *Description:* {{ .CommonAnnotations.description }}
+          *Time:* {{ .StartsAt }}
+        color: '#ff0000'
+        send_resolved: true
+  
+  # Warning alerts - Slack only
+  - name: 'warning-receiver'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-warning'
+        title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
+        text: |-
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Description:* {{ .CommonAnnotations.description }}
+          *Value:* {{ .CommonLabels.value }}
+        color: '#ffaa00'
+        send_resolved: true
+  
+  # Info alerts - webhook (for logging)
+  - name: 'info-receiver'
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+  
+  # Database team specific alerts
+  - name: 'database-team'
+    email_configs:
+      - to: 'dba-team@yourcompany.com'
+        from: 'alertmanager@yourcompany.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'somtochukwueze95@gmail.com'
+        #auth_password: 'your-app-password'
+        send_resolved: true
+  
+  # Performance team specific alerts
+  - name: 'performance-team'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#performance'
+        title: '⚡ Performance Alert'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+
+# Inhibition rules - prevent alert spam
+inhibit_rules:
+  # If critical alert is firing, silence related warning alerts
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance', 'service']
+  
+  # If service is down, don't send latency/error alerts
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: 'HighLatency|HighErrorRate'
+    equal: ['instance', 'job']

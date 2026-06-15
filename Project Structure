@@ -1,0 +1,71 @@
+ecommerce-platform/
+│
+├── terraform/                          # Infrastructure as Code
+│   ├── environments/
+│   │   ├── dev/
+│   │   ├── staging/
+│   │   └── prod/
+│   ├── modules/
+│   │   ├── vpc/
+│   │   ├── ecs/
+│   │   ├── rds/
+│   │   ├── redis/
+│   │   └── monitoring/
+│   └── main.tf
+│
+├── backend/
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── routes/
+│   │   │   ├── models/
+│   │   │   └── schemas/
+│   │   ├── services/
+│   │   ├── middleware/
+│   │   └── main.py
+│   ├── tests/
+│   │   ├── unit/
+│   │   └── integration/
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   └── services/
+│   ├── public/
+│   ├── Dockerfile
+│   └── package.json
+│
+├── kubernetes/                         # ECS task definitions (or K8s)
+│   ├── backend-task.json
+│   ├── frontend-task.json
+│   └── alb-config.yaml
+│
+├── monitoring/
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   ├── grafana/
+│   │   └── dashboards/
+│   ├── loki/
+│   └── alertmanager/
+│       └── alerts.yml
+│
+├── .github/workflows/
+│   ├── ci.yml                          # Continuous Integration
+│   ├── cd-staging.yml                  # Deploy to staging
+│   └── cd-prod.yml                     # Deploy to production
+│
+├── scripts/
+│   ├── load-test.js                    # k6 load testing script
+│   ├── seed-database.py
+│   └── security-scan.sh
+│
+├── docs/
+│   ├── architecture.md
+│   ├── runbook.md
+│   └── on-call-guide.md
+│
+├── docker-compose.yml                  # Local development
+└── README.md
