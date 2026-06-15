@@ -11,7 +11,7 @@ app = FastAPI(
     description="Production e-commerce platform backend",
     version="1.0.0",
     docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    redoc_url="/api/redoc",
 )
 
 # CORS - Allow frontend to call API
@@ -24,10 +24,7 @@ app.add_middleware(
 )
 
 # Security headers
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=settings.ALLOWED_HOSTS
-)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS)
 
 # Include routers
 app.include_router(products.router, prefix="/api/products", tags=["Products"])
@@ -36,11 +33,7 @@ app.include_router(cart.router, prefix="/api/cart", tags=["Cart"])
 app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
 
 # Redis for caching
-redis_client = redis.Redis(
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    decode_responses=True
-)
+redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
 
 
 @app.get("/")
@@ -57,8 +50,4 @@ async def health_check():
 @app.get("/api/metrics")
 async def get_metrics():
     """Prometheus metrics endpoint"""
-    return {
-        "active_sessions": redis_client.dbsize(),
-        "cache_hit_rate": "99.2%",
-        "uptime_seconds": 86400
-    }
+    return {"active_sessions": redis_client.dbsize(), "cache_hit_rate": "99.2%", "uptime_seconds": 86400}

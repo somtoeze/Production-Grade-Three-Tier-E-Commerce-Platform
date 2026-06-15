@@ -18,7 +18,7 @@ async def get_products(
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     featured: Optional[bool] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get paginated list of products with filtering"""
 
@@ -29,12 +29,7 @@ async def get_products(
         query = query.filter(Product.category == category)
 
     if search:
-        query = query.filter(
-            or_(
-                Product.name.ilike(f"%{search}%"),
-                Product.description.ilike(f"%{search}%")
-            )
-        )
+        query = query.filter(or_(Product.name.ilike(f"%{search}%"), Product.description.ilike(f"%{search}%")))
 
     if min_price:
         query = query.filter(Product.price >= min_price)
@@ -51,12 +46,7 @@ async def get_products(
     # Get paginated results
     products = query.offset(skip).limit(limit).all()
 
-    return {
-        "items": products,
-        "total": total,
-        "skip": skip,
-        "limit": limit
-    }
+    return {"items": products, "total": total, "skip": skip, "limit": limit}
 
 
 @router.get("/{product_id}", response_model=ProductResponse)
