@@ -8,8 +8,8 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY_BACKEND: ecommerce-backend
-  ECR_REPOSITORY_FRONTEND: ecommerce-frontend
+  ECR_REPOSITORY_BACKEND: e-commerce-backend
+  ECR_REPOSITORY_FRONTEND: e-commerce-frontend
 
 jobs:
   # Stage 1: Lint and Test
@@ -32,8 +32,8 @@ jobs:
       - name: Lint Python code
         run: |
           cd backend
-          flake8 src/ --max-line-length=120
-          black --check src/
+          flake8 app/ --max-line-length=120
+          black --check app/
       
       - name: Run unit tests with coverage
         run: |
