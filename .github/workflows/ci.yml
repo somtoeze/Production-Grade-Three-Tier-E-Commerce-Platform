@@ -73,10 +73,10 @@ jobs:
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
       
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+      # - name: Upload Trivy results to GitHub Security
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
 
   # Stage 3: Build and Push to ECR
   build-and-push:
